@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# j2render - render document from Jinja2 template and YAML variables
+# j2render.py - render document from Jinja2 template and YAML variables
 # Copyright (C) 2020  Erik Auerswald <auerswald@fg-networking.de>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+This module provides a CLI tool to render Jinja2 templates.
+
+The CLI tool j2render.py allows creating (rendering) a document based
+on templates in Jinja2 format together with variable definitions read
+from a YAML file.
+
+This module is not intended for import into Python programs and has no
+documented API.  All functions and data are internal to the CLI tool.
+"""
 
 import argparse
 import fileinput
@@ -61,20 +72,24 @@ verbose = None
 
 
 def dbg(message):
+    """Generate debugging information."""
     if debug is not None:
         print(f'{PROG}: debug: {message}')
 
 
 def err(message):
+    """Print an error message."""
     print(f'{PROG}: error: {message}', file=sys.stderr)
 
 
 def vrb(message):
+    """Generate verbose information."""
     if verbose is not None:
         print(f'{PROG}: info: {message}')
 
 
 def normalize_directory_name(name):
+    """Remove trailing path separator from directory name."""
     dbg(f'normalizing directory name {name}')
     if not name or not name.endswith('/') or len(name) == 1 or name == '//':
         return name
@@ -82,6 +97,7 @@ def normalize_directory_name(name):
 
 
 def parse_arguments():
+    """Parse command line arguments."""
     ap = argparse.ArgumentParser(
         prog=PROG,
         description=DESC,
@@ -146,6 +162,7 @@ def parse_arguments():
 
 
 def process_combined(file_list, variables, output):
+    """Render one output document by combining all templates."""
     vrb('processing combined template(s).')
     template_lines = []
     last_file = ''
@@ -171,6 +188,7 @@ def process_combined(file_list, variables, output):
 
 
 def process_separate(file_list, variables, outdir):
+    """Render one output document per template."""
     vrb('processing separate template files.')
     for template_file in file_list:
         vrb(f'processing template file "{template_file}".')
@@ -187,6 +205,7 @@ def process_separate(file_list, variables, outdir):
 
 
 def main():
+    """Entry point for command line tool."""
     global debug
     global verbose
     variables = {}
