@@ -208,12 +208,14 @@ def main():
             variables = yaml.load(f)
     # render templates
     dbg(f'args.TEMPLATE = {args.TEMPLATE}')
+    # case of writing to one output file per template
     if args.separate:
         dbg(f'args.outdir = {args.outdir}')
         outdir = normalize_directory_name(args.outdir)
         dbg(f'calling process_separate({args.TEMPLATE}, {variables}, ' +
             f'{outdir})')
         ret = process_separate(args.TEMPLATE, variables, outdir)
+    # case of combining all templates to produce one output file
     else:
         dbg(f'calling process_combined({args.TEMPLATE}, {variables}, ' +
             f'{args.output})')
