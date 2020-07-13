@@ -36,7 +36,7 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 COPYRIGHT_YEARS = '2020'
 AUTHORS = 'Erik Auerswald'
 
@@ -59,14 +59,16 @@ are specified.
 By default, all templates are concatenated to create one output document.
 
 The output document is written to STDOUT unless an output filename is
-specified with the --output option, or the --separate option is given.
+specified with the --output option, or the --outdir option is given.
 
-If the --separate option is given, {PROG} treats templates separately
+If the --outdir option is given, {PROG} treats templates separately
 and creates one output document per template, using the template name
-without the last extension as file name.
+without the last extension as file name (e.g., my.txt.j2 -> my.txt).
+
+The options --output and --outdir mutually exclude each other.
 '''
 
-# global state variables
+# global state variables to control logging output
 debug = None    # pylint: disable=invalid-name
 verbose = None  # pylint: disable=invalid-name
 
@@ -119,19 +121,12 @@ def parse_arguments():
         '-o',
         '--output',
         default=sys.stdout,
-        help='output filename'
+        help='output filename when combining templates'
     )
     a_p.add_argument(
         '-d',
         '--outdir',
-        default='.',
-        help='directory for output file(s)'
-    )
-    a_p.add_argument(
-        '-s',
-        '--separate',
-        action='store_true',
-        help='consider templates as separate'
+        help='directory for output file(s) per template(s)'
     )
     a_p.add_argument(
         '--verbose',
@@ -146,14 +141,11 @@ def parse_arguments():
 
     args = a_p.parse_args()
 
-    if not args.TEMPLATE and args.separate:
-        err('option "--separate" requires template files.')
+    if not args.TEMPLATE and args.outdir is not None:
+        err('per template rendering requires template file(s).')
         sys.exit(2)
-    if args.separate and args.output is not sys.stdout:
-        err('option "--output" cannot be used with option "--separate".')
-        exit(2)
-    if args.outdir != '.' and not args.separate:
-        err('option "--outdir" requires option "--separate".')
+    if args.outdir and args.output is not sys.stdout:
+        err('options "--output" and "--outdir" cannot be used together.')
         exit(2)
     if args.debug:
         args.verbose = True
@@ -223,27 +215,30 @@ def main():
         debug = True
         dbg('enabling debug information.')
     vrb('parsed command line arguments.')
+
     # load variables
     vrb('looking for variable definitions.')
     if args.variables:
         vrb(f'reading variables from "{args.variables}".')
         with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
             variables = yaml.load(f)          # pylint: disable=invalid-name
-    # render templates
+
+    # render templates (two general cases: separate or combined output)
     dbg(f'args.TEMPLATE = {args.TEMPLATE}')
-    # case of writing to one output file per template
-    if args.separate:
+    # case of combining all templates to produce one output file
+    if args.outdir is None:
+        dbg(f'calling process_combined({args.TEMPLATE}, {variables}, ' +
+            f'{args.output})')
+        ret = process_combined(args.TEMPLATE, variables, args.output)
+    # case of writing one output file per template
+    else:
         dbg(f'args.outdir = {args.outdir}')
         outdir = normalize_directory_name(args.outdir)
         dbg(f'calling process_separate({args.TEMPLATE}, {variables}, ' +
             f'{outdir})')
         ret = process_separate(args.TEMPLATE, variables, outdir)
-    # case of combining all templates to produce one output file
-    else:
-        dbg(f'calling process_combined({args.TEMPLATE}, {variables}, ' +
-            f'{args.output})')
-        ret = process_combined(args.TEMPLATE, variables, args.output)
     dbg(f'rendering function returned "{ret}"')
+
     return ret
 
 
