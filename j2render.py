@@ -29,9 +29,9 @@ documented API.  All functions and data are internal to the CLI tool.
 
 import argparse
 import fileinput
-import jinja2
 import os.path
 import sys
+import jinja2
 import yaml
 
 # information about the program
@@ -67,8 +67,8 @@ without the last extension as file name.
 '''
 
 # global state variables
-debug = None
-verbose = None
+debug = None    # pylint: disable=invalid-name
+verbose = None  # pylint: disable=invalid-name
 
 
 def dbg(message):
@@ -98,53 +98,53 @@ def normalize_directory_name(name):
 
 def parse_arguments():
     """Parse command line arguments."""
-    ap = argparse.ArgumentParser(
+    a_p = argparse.ArgumentParser(
         prog=PROG,
         description=DESC,
         epilog=EPIL,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    ap.add_argument('-V', '--version', action='version', version=VERS)
-    ap.add_argument(
+    a_p.add_argument('-V', '--version', action='version', version=VERS)
+    a_p.add_argument(
         'TEMPLATE',
         nargs='*',
         help='Jinja2 template'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '-v',
         '--variables',
         help='YAML variables file'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '-o',
         '--output',
         default=sys.stdout,
         help='output filename'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '-d',
         '--outdir',
         default='.',
         help='directory for output file(s)'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '-s',
         '--separate',
         action='store_true',
         help='consider templates as separate'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '--verbose',
         action='store_true',
         help='print progress information'
     )
-    ap.add_argument(
+    a_p.add_argument(
         '--debug',
         action='store_true',
         help='print debugging information (includes --verbose)'
     )
 
-    args = ap.parse_args()
+    args = a_p.parse_args()
 
     if not args.TEMPLATE and args.separate:
         err('option "--separate" requires template files.')
@@ -166,13 +166,15 @@ def process_combined(file_list, variables, output):
     vrb('processing combined template(s).')
     template_lines = []
     last_file = ''
-    with fileinput.input(file_list) as f:
-        for line in f:
-            current_file = f.filename()
+
+    with fileinput.input(file_list) as f:  # pylint: disable=invalid-name
+        for line in f:                     # pylint: disable=invalid-name
+            current_file = f.filename()    # pylint: disable=invalid-name
             if current_file != last_file:
                 vrb(f'reading template {current_file}.')
                 last_file = current_file
             template_lines.append(line)
+
     template_string = ''.join(template_lines)
     template = jinja2.Template(template_string)
     vrb('rendering document.')
@@ -182,6 +184,7 @@ def process_combined(file_list, variables, output):
         print(document)
     else:
         vrb(f'writing output to file "{output}".')
+        # pylint: disable=invalid-name
         with open(output, 'w') as f:
             print(document, file=f)
     return 0
@@ -192,13 +195,14 @@ def process_separate(file_list, variables, outdir):
     vrb('processing separate template files.')
     for template_file in file_list:
         vrb(f'processing template file "{template_file}".')
-        with open(template_file) as f:
-            template_string = f.read()
+        with open(template_file) as f:  # pylint: disable=invalid-name
+            template_string = f.read()  # pylint: disable=invalid-name
         template = jinja2.Template(template_string)
         output_basename = os.path.splitext(os.path.basename(template_file))[0]
         dbg(f'output_basename = {output_basename}')
         output = os.path.sep.join([outdir, output_basename])
         vrb(f'writing output to "{output}".')
+        # pylint: disable=invalid-name
         with open(output, 'w') as f:
             print(template.render(**variables), file=f)
     return 0
@@ -206,8 +210,8 @@ def process_separate(file_list, variables, outdir):
 
 def main():
     """Entry point for command line tool."""
-    global debug
-    global verbose
+    global debug    # pylint: disable=global-statement,invalid-name
+    global verbose  # pylint: disable=global-statement,invalid-name
     variables = {}
 
     # parse command line arguments
@@ -223,8 +227,8 @@ def main():
     vrb('looking for variable definitions.')
     if args.variables:
         vrb(f'reading variables from "{args.variables}".')
-        with open(args.variables, 'r') as f:
-            variables = yaml.load(f)
+        with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
+            variables = yaml.load(f)          # pylint: disable=invalid-name
     # render templates
     dbg(f'args.TEMPLATE = {args.TEMPLATE}')
     # case of writing to one output file per template
@@ -244,5 +248,5 @@ def main():
 
 
 if __name__ == '__main__':
-    exit_code = main()
+    exit_code = main()  # pylint: disable=invalid-name
     sys.exit(exit_code)
