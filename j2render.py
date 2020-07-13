@@ -19,6 +19,7 @@
 import argparse
 import fileinput
 import jinja2
+import os.path
 import sys
 import yaml
 
@@ -176,9 +177,9 @@ def process_separate(file_list, variables, outdir):
         with open(template_file) as f:
             template_string = f.read()
         template = jinja2.Template(template_string)
-        output_basename = template_file.split('/')[-1].rpartition('.')[0]
+        output_basename = os.path.splitext(os.path.basename(template_file))[0]
         dbg(f'output_basename = {output_basename}')
-        output = '/'.join([outdir, output_basename])
+        output = os.path.sep.join([outdir, output_basename])
         vrb(f'writing output to "{output}".')
         with open(output, 'w') as f:
             print(template.render(**variables), file=f)
