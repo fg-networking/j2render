@@ -90,14 +90,6 @@ def vrb(message):
         print(f'{PROG}: info: {message}')
 
 
-def normalize_directory_name(name):
-    """Remove trailing path separator from directory name."""
-    dbg(f'normalizing directory name {name}')
-    if not name or not name.endswith('/') or len(name) == 1 or name == '//':
-        return name
-    return name.rstrip('/')
-
-
 def parse_arguments():
     """Parse command line arguments."""
     a_p = argparse.ArgumentParser(
@@ -233,7 +225,7 @@ def main():
     # case of writing one output file per template
     else:
         dbg(f'args.outdir = {args.outdir}')
-        outdir = normalize_directory_name(args.outdir)
+        outdir = os.path.normpath(args.outdir)
         dbg(f'calling process_separate({args.TEMPLATE}, {variables}, ' +
             f'{outdir})')
         ret = process_separate(args.TEMPLATE, variables, outdir)
