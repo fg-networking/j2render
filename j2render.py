@@ -92,46 +92,46 @@ def vrb(message):
 
 def parse_arguments():
     """Parse command line arguments."""
-    a_p = argparse.ArgumentParser(
+    arg_prs = argparse.ArgumentParser(
         prog=PROG,
         description=DESC,
         epilog=EPIL,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    a_p.add_argument('-V', '--version', action='version', version=VERS)
-    a_p.add_argument(
+    arg_prs.add_argument('-V', '--version', action='version', version=VERS)
+    arg_prs.add_argument(
         'TEMPLATE',
         nargs='*',
         help='Jinja2 template'
     )
-    a_p.add_argument(
+    arg_prs.add_argument(
         '-v',
         '--variables',
         help='YAML variables file'
     )
-    a_p.add_argument(
+    arg_prs.add_argument(
         '-o',
         '--output',
         default=sys.stdout,
         help='output filename when combining templates'
     )
-    a_p.add_argument(
+    arg_prs.add_argument(
         '-d',
         '--outdir',
         help='directory for output file(s) per template(s)'
     )
-    a_p.add_argument(
+    arg_prs.add_argument(
         '--verbose',
         action='store_true',
         help='print progress information'
     )
-    a_p.add_argument(
+    arg_prs.add_argument(
         '--debug',
         action='store_true',
         help='print debugging information (includes --verbose)'
     )
 
-    args = a_p.parse_args()
+    args = arg_prs.parse_args()
 
     if not args.TEMPLATE and args.outdir is not None:
         err('per template rendering requires template file(s).')
