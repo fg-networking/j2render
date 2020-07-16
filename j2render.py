@@ -214,6 +214,7 @@ def main():
         vrb(f'reading variables from "{args.variables}".')
         with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
             variables = yaml.load(f)          # pylint: disable=invalid-name
+        dbg(variables)
 
     # render templates (two general cases: separate or combined output)
     dbg(f'args.TEMPLATE = {args.TEMPLATE}')
