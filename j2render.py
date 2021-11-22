@@ -218,7 +218,7 @@ def main():
     if args.variables:
         vrb(f'reading variables from "{args.variables}".')
         with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
-            variables = yaml.load(f)          # pylint: disable=invalid-name
+            variables = yaml.safe_load(f)     # pylint: disable=invalid-name
         if (args.remove_root_key and variables and isinstance(variables, dict)
                 and len(variables.keys()) == 1):
             dbg('removing root key from variables')
