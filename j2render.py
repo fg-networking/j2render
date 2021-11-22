@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # j2render.py - render document from Jinja2 template and YAML variables
-# Copyright (C) 2020  Erik Auerswald <auerswald@fg-networking.de>
+# Copyright (C) 2020-2021  Erik Auerswald <auerswald@fg-networking.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -130,6 +130,11 @@ def parse_arguments():
         action='store_true',
         help='print debugging information (includes --verbose)'
     )
+    arg_prs.add_argument(
+        '--remove-root-key',
+        action='store_true',
+        help='shorten variable names by removing the root key from the name'
+    )
 
     args = arg_prs.parse_args()
 
@@ -214,6 +219,10 @@ def main():
         vrb(f'reading variables from "{args.variables}".')
         with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
             variables = yaml.load(f)          # pylint: disable=invalid-name
+        if (args.remove_root_key and variables and isinstance(variables, dict)
+                and len(variables.keys()) == 1):
+            dbg('removing root key from variables')
+            variables = variables[next(iter(variables.keys()))]
         dbg(variables)
 
     # render templates (two general cases: separate or combined output)
