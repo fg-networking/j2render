@@ -36,7 +36,7 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 COPYRIGHT_YEARS = '2020-2021'
 AUTHORS = 'Erik Auerswald'
 
@@ -66,6 +66,9 @@ and creates one output document per template, using the template name
 without the last extension as file name (e.g., my.txt.j2 -> my.txt).
 
 The options --output and --outdir mutually exclude each other.
+
+If several variable files are given (using one --variables option per file),
+their contents are merged into a single data structure.
 '''
 
 # global state variables to control logging output
@@ -107,7 +110,8 @@ def parse_arguments():
     arg_prs.add_argument(
         '-v',
         '--variables',
-        help='YAML variables file'
+        action='append',
+        help='YAML variables file (can be given mutiple times)'
     )
     arg_prs.add_argument(
         '-o',
@@ -216,13 +220,15 @@ def main():
     # load variables
     vrb('looking for variable definitions.')
     if args.variables:
-        vrb(f'reading variables from "{args.variables}".')
-        with open(args.variables, 'r') as f:  # pylint: disable=invalid-name
-            variables = yaml.safe_load(f)     # pylint: disable=invalid-name
-        if (args.remove_root_key and variables and isinstance(variables, dict)
-                and len(variables.keys()) == 1):
-            dbg('removing root key from variables')
-            variables = variables[next(iter(variables.keys()))]
+        for vars_file in args.variables:
+            vrb(f'reading variables from file "{vars_file}".')
+            with open(vars_file, 'r') as f:    # pylint: disable=invalid-name
+                variables = yaml.safe_load(f)  # pylint: disable=invalid-name
+            if (args.remove_root_key and variables and
+                    isinstance(variables, dict) and
+                    len(variables.keys()) == 1):
+                dbg(f'removing root key from variables in file "{vars_file}"')
+                variables = variables[next(iter(variables.keys()))]
         dbg(variables)
 
     # render templates (two general cases: separate or combined output)
