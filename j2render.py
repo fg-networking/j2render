@@ -160,7 +160,7 @@ def process_combined(file_list, variables, output):
         for line in f:                     # pylint: disable=invalid-name
             current_file = f.filename()    # pylint: disable=invalid-name
             if current_file != last_file:
-                vrb(f'reading template {current_file}.')
+                vrb(f'reading template file "{current_file}".')
                 last_file = current_file
             template_lines.append(line)
 
