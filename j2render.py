@@ -36,8 +36,8 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.2'
-COPYRIGHT_YEARS = '2020'
+VERSION = '0.0.3'
+COPYRIGHT_YEARS = '2020-2021'
 AUTHORS = 'Erik Auerswald'
 
 # definitions for help and version functionality
