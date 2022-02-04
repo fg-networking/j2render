@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # j2render.py - render document from Jinja2 template and YAML variables
-# Copyright (C) 2020-2021  Erik Auerswald <auerswald@fg-networking.de>
+# Copyright (C) 2020-2022  Erik Auerswald <auerswald@fg-networking.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.4'
-COPYRIGHT_YEARS = '2020-2021'
-AUTHORS = 'Erik Auerswald'
+VERSION = '0.0.5'
+COPYRIGHT_YEARS = '2020-2022'
+AUTHORS = 'Erik Auerswald <auerswald@fg-networking.de>'
 
 # definitions for help and version functionality
 DESC = '''\
