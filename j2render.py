@@ -245,7 +245,7 @@ def main():
                 tmp = yaml.safe_load(f)        # pylint: disable=invalid-name
             dbg(f'{tmp=}')
             if tmp and not isinstance(tmp, dict):
-                err('variables must be given as key/value pairs.' )
+                err('variables must be given as key/value pairs.')
                 return 1
             if (args.remove_root_key and tmp and isinstance(tmp, dict) and
                     len(tmp.keys()) == 1):
