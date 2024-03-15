@@ -36,7 +36,7 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 COPYRIGHT_YEARS = '2020-2024'
 AUTHORS = 'Erik Auerswald <auerswald@fg-networking.de>'
 
@@ -80,7 +80,7 @@ quiet = None    # pylint: disable=invalid-name
 def dbg(message):
     """Generate debugging information."""
     if debug is not None:
-        print(f'{PROG}: debug: {message}')
+        print(f'{PROG}: debug: {message}', file=sys.stderr)
 
 
 def err(message):
@@ -97,7 +97,7 @@ def wrn(message):
 def vrb(message):
     """Generate verbose information."""
     if verbose is not None and quiet is None:
-        print(f'{PROG}: info: {message}')
+        print(f'{PROG}: info: {message}', file=sys.stderr)
 
 
 def parse_arguments():
