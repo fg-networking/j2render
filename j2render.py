@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # j2render.py - render document from Jinja2 template and YAML variables
-# Copyright (C) 2020-2022  Erik Auerswald <auerswald@fg-networking.de>
+# Copyright (C) 2020-2024  Erik Auerswald <auerswald@fg-networking.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.5'
-COPYRIGHT_YEARS = '2020-2022'
+VERSION = '0.0.6'
+COPYRIGHT_YEARS = '2020-2024'
 AUTHORS = 'Erik Auerswald <auerswald@fg-networking.de>'
 
 # definitions for help and version functionality
@@ -74,6 +74,7 @@ their contents are merged into a single data structure.
 # global state variables to control logging output
 debug = None    # pylint: disable=invalid-name
 verbose = None  # pylint: disable=invalid-name
+quiet = None    # pylint: disable=invalid-name
 
 
 def dbg(message):
@@ -87,9 +88,15 @@ def err(message):
     print(f'{PROG}: error: {message}', file=sys.stderr)
 
 
+def wrn(message):
+    """Print a warning message."""
+    if quiet is None:
+        print(f'{PROG}: warning: {message}', file=sys.stderr)
+
+
 def vrb(message):
     """Generate verbose information."""
-    if verbose is not None:
+    if verbose is not None and quiet is None:
         print(f'{PROG}: info: {message}')
 
 
@@ -130,6 +137,11 @@ def parse_arguments():
         help='print progress information'
     )
     arg_prs.add_argument(
+        '--quiet',
+        action='store_true',
+        help='suppress warning and informational messages'
+    )
+    arg_prs.add_argument(
         '--debug',
         action='store_true',
         help='print debugging information (includes --verbose)'
@@ -150,6 +162,7 @@ def parse_arguments():
         exit(2)
     if args.debug:
         args.verbose = True
+        args.quiet = False
 
     return args
 
@@ -205,12 +218,16 @@ def main():
     """Entry point for command line tool."""
     global debug    # pylint: disable=global-statement,invalid-name
     global verbose  # pylint: disable=global-statement,invalid-name
+    global quiet    # pylint: disable=global-statement,invalid-name
     variables = {}
 
     # parse command line arguments
     args = parse_arguments()
     if args.verbose:
         verbose = True
+        vrb('enabling progress information.')
+    if args.quiet:
+        quiet = True
         vrb('enabling progress information.')
     if args.debug:
         debug = True
@@ -219,17 +236,25 @@ def main():
 
     # load variables
     vrb('looking for variable definitions.')
+    if len(args.variables) > 1 and not args.remove_root_key:
+        wrn('variables with identical root key overwrite each other.')
     if args.variables:
         for vars_file in args.variables:
             vrb(f'reading variables from file "{vars_file}".')
             with open(vars_file, 'r') as f:    # pylint: disable=invalid-name
-                variables = yaml.safe_load(f)  # pylint: disable=invalid-name
-            if (args.remove_root_key and variables and
-                    isinstance(variables, dict) and
-                    len(variables.keys()) == 1):
-                dbg(f'removing root key from variables in file "{vars_file}"')
-                variables = variables[next(iter(variables.keys()))]
-        dbg(variables)
+                tmp = yaml.safe_load(f)        # pylint: disable=invalid-name
+            dbg(f'{tmp=}')
+            if tmp and not isinstance(tmp, dict):
+                err('variables must be given as key/value pairs.' )
+                return 1
+            if (args.remove_root_key and tmp and isinstance(tmp, dict) and
+                    len(tmp.keys()) == 1):
+                dbg(f'removing root key from vars in file "{vars_file}"')
+                tmp = tmp[next(iter(tmp.keys()))]
+                dbg(f'{tmp=}')
+            vrb('merging just read variables.')
+            variables.update(tmp)
+            dbg(f'{variables=}')
 
     # render templates (two general cases: separate or combined output)
     dbg(f'args.TEMPLATE = {args.TEMPLATE}')
