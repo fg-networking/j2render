@@ -36,7 +36,7 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.7'
+VERSION = '0.0.8'
 COPYRIGHT_YEARS = '2020-2024'
 AUTHORS = 'Erik Auerswald <auerswald@fg-networking.de>'
 
@@ -236,9 +236,9 @@ def main():
 
     # load variables
     vrb('looking for variable definitions.')
-    if len(args.variables) > 1 and not args.remove_root_key:
-        wrn('variables with identical root key overwrite each other.')
     if args.variables:
+        if len(args.variables) > 1 and not args.remove_root_key:
+            wrn('variables with identical root key overwrite each other.')
         for vars_file in args.variables:
             vrb(f'reading variables from file "{vars_file}".')
             with open(vars_file, 'r') as f:    # pylint: disable=invalid-name
