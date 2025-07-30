@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # j2render.py - render document from Jinja2 template and YAML variables
-# Copyright (C) 2020-2024  Erik Auerswald <auerswald@fg-networking.de>
+# Copyright (C) 2020-2025  Erik Auerswald <auerswald@fg-networking.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ import yaml
 
 # information about the program
 PROG = 'j2render'
-VERSION = '0.0.8'
-COPYRIGHT_YEARS = '2020-2024'
+VERSION = '0.0.9'
+COPYRIGHT_YEARS = '2020-2025'
 AUTHORS = 'Erik Auerswald <auerswald@fg-networking.de>'
 
 # definitions for help and version functionality
@@ -182,9 +182,17 @@ def process_combined(file_list, variables, output):
             template_lines.append(line)
 
     template_string = ''.join(template_lines)
-    template = jinja2.Template(template_string)
+    try:
+        template = jinja2.Template(template_string)
+    except jinja2.exceptions.TemplateError as exc:
+        err(f'cannot parse combined template: {exc}')
+        return 1
     vrb('rendering document.')
-    document = template.render(**variables)
+    try:
+        document = template.render(**variables)
+    except jinja2.exceptions.TemplateError as exc:
+        err(f'cannot render combined template: {exc}')
+        return 1
     if output is sys.stdout:
         vrb('writing output to STDOUT.')
         print(document)
@@ -203,14 +211,22 @@ def process_separate(file_list, variables, outdir):
         vrb(f'processing template file "{template_file}".')
         with open(template_file) as f:  # pylint: disable=invalid-name
             template_string = f.read()  # pylint: disable=invalid-name
-        template = jinja2.Template(template_string)
+        try:
+            template = jinja2.Template(template_string)
+        except jinja2.exceptions.TemplateError as exc:
+            err(f'cannot parse template "{template_file}": {exc}')
+            return 1
         output_basename = os.path.splitext(os.path.basename(template_file))[0]
         dbg(f'output_basename = {output_basename}')
         output = os.path.sep.join([outdir, output_basename])
         vrb(f'writing output to "{output}".')
         # pylint: disable=invalid-name
         with open(output, 'w') as f:
-            print(template.render(**variables), file=f)
+            try:
+                print(template.render(**variables), file=f)
+            except jinja2.exceptions.TemplateError as exc:
+                err(f'cannot render template "{template_file}": {exc}')
+                return 1
     return 0
 
 
